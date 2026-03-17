@@ -1,7 +1,6 @@
 pytorch-lightning==1.8.6
 torch<=1.13.1,>=1.7
 tqdm
-bcolz-zipline
 prettytable
 menpo
 mxnet
