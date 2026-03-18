@@ -1,6 +1,5 @@
 import os
 import cv2
-import gdown
 import numpy as np
 import torch
 
@@ -38,20 +37,3 @@ def imwrite(img, file_path):
     ok = cv2.imwrite(file_path, img)
     if not ok:
         raise IOError(f'Failed to write image: {file_path}')
-    
-
-def download_checkpoint(model_dir, ckpt_filename):
-    """Download checkpoint if not present locally."""
-    model_path = os.path.join(model_dir, ckpt_filename)
-    if os.path.exists(model_path):
-        return model_path
-    
-    print("did not return")
-    # Read .txt file and dowmload from GDrive
-    txt_path = os.path.join(model_dir, 'team03_IdpCodeFormer.txt')
-    with open(txt_path, 'r') as f:
-        url = f.read().strip()
-    
-    print(f'Downloading checkpoint from {url}...')
-    gdown.download(url, model_path, fuzzy=True)
-    return model_path

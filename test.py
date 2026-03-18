@@ -21,11 +21,13 @@ def select_model(args, device):
         name = f"{model_id:02}_CodeFormer_baseline"
         model_path = os.path.join('model_zoo', 'team00_CodeFormer')
         model_func = CodeFormer
+    
     elif model_id == 3:
         from models.team03_IdpCodeFormer import main as IdpCodeFormer
         name = f"{model_id:02}_IdpCodeFormer"
         model_path = os.path.join('model_zoo', 'team03_IdpCodeFormer')
         model_func = IdpCodeFormer
+
     else:
         raise NotImplementedError(f"Model {model_id} is not implemented.")
 

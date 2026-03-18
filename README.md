@@ -47,14 +47,8 @@ The pretrained model should be placed under `model_zoo/team03_IdpCodeFormer/`.
 Run the following command from the root of the repository:
 
 ```bash
-wget -i model_zoo/team03_IdpCodeFormer/team03_IdpCodeFormer.txt -P model_zoo/team03_IdpCodeFormer/
+wget -i model_zoo/team03_IdpCodeFormer/team03_IdpCodeFormer.txt -O model_zoo/team03_IdpCodeFormer/idpcodeformer.pth
 ```
-
-Alternatively, download manually from:
-```
-https://drive.google.com/file/d/1mfHregud3cWycOHmnjG3DzU-KDhPwWaq/view?usp=sharing
-```
-and place the file under `model_zoo/team03_IdpCodeFormer/`.
 
 ---
 

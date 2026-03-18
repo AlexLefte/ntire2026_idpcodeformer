@@ -6,31 +6,14 @@ import torch
 import numpy as np
 
 from .networks.codeformer_nets import CodeFormer
-from .utils import img2tensor, tensor2img, imwrite, download_checkpoint
+from .utils import img2tensor, tensor2img, imwrite
 from torchvision.transforms.functional import normalize
 
 
 def main(model_dir, input_path=None, output_path=None, device=None):
-    # ------------------------ set up parameters ------------------------    
-    print(f"Model dir: {model_dir}")
-    print(f"Input path: {input_path}")
-    print(f"Output path: {output_path}")
-
-    target = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weights')
-    if os.path.exists(target):
-        print(f"{target} already exists. Removing it...")
-        os.remove(target)
-    os.symlink(os.path.abspath(model_dir), target)
-    # target = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'weights')
-    # if os.path.exists(target) or os.path.islink(target):
-    #     print(f"{target} already exists. Removing it...")
-    #     os.unlink(target)
-    # os.symlink(os.path.abspath(model_dir), target, target_is_directory=True) 
-    print(f"Create a symbolic link from {os.path.abspath(model_dir)} to {target}. ")
-
     # ------------------------ checkpoint ------------------------
     ckpt_filename = 'idpcodeformer.pth'
-    model_path = download_checkpoint(model_dir, ckpt_filename)
+    model_path = os.path.join(model_dir, ckpt_filename)
     if not os.path.exists(model_path):
         raise FileNotFoundError(f'Checkpoint not found: {model_path}')
  
@@ -45,7 +28,7 @@ def main(model_dir, input_path=None, output_path=None, device=None):
     if len(input_img_list) == 0:
         raise FileNotFoundError(f'No image found in: {input_path}')
  
-    result_root = output_path if output_path is not None else f'results/{os.path.basename(input_path)}_{w}'
+    result_root = output_path if output_path is not None else f'results/{os.path.basename(input_path)}'
     os.makedirs(result_root, exist_ok=True)
  
     # ------------------------ Load the model ------------------------
