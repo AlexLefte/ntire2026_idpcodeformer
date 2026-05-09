@@ -3,6 +3,7 @@ import cv2
 import argparse
 import glob
 import torch
+import time
 import numpy as np
 
 from .networks.codeformer_nets import CodeFormer
@@ -37,10 +38,25 @@ def main(model_dir, input_path=None, output_path=None, device=None):
         connect_list=['32', '64', '128', '256']
     ).to(device)
     checkpoint = torch.load(model_path, map_location=device)
+    if 'params_ema' in checkpoint:
+        checkpoint = checkpoint['params_ema']
     net.load_state_dict(checkpoint)
     net.eval()
+
+    # Set w_scale
+    w_scale = 0.5
+    use_adain = False
  
+    # Get model FLOPS and inference time
+    from utils.model_summary import get_model_flops
+    def codeformer_input(input_res):
+        return {'x': torch.FloatTensor(1, *input_res).to(device), 'w': w_scale, 'adain': use_adain}
+
+    flops = get_model_flops(net, input_res=(3, 512, 512), print_per_layer_stat=False, input_constructor=codeformer_input)
+    print(f"FLOPs: {flops / 1e9:.2f} G")
+
     # ------------------------ Process and predict ------------------------
+    total_time = 0
     test_img_num = len(input_img_list)
     for i, img_path in enumerate(input_img_list):
         img_name = os.path.basename(img_path)
@@ -58,7 +74,11 @@ def main(model_dir, input_path=None, output_path=None, device=None):
         # Infer
         try:
             with torch.no_grad():
-                output = net(img_t, w=0.5, adain=True)[0]
+                torch.cuda.synchronize()
+                t_start = time.time()
+                output = net(img_t, w=w_scale, adain=use_adain)[0]
+                torch.cuda.synchronize()
+                total_time += time.time() - t_start
                 restored = tensor2img(output, rgb2bgr=True, min_max=(-1, 1))
             del output
             torch.cuda.empty_cache()
@@ -70,4 +90,6 @@ def main(model_dir, input_path=None, output_path=None, device=None):
         save_path = os.path.join(result_root, f'{basename}.png')
         imwrite(restored.astype('uint8'), save_path)
  
+    avg_time = total_time / test_img_num
+    print(f'\nAvg inference time: {avg_time * 1000:.2f} ms ({1/avg_time:.2f} FPS)')
     print(f'\nAll results are saved in {result_root}')
